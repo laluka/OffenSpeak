@@ -2,7 +2,7 @@
 
 Browser-based Speech-to-Text and Text-to-Speech toolbox. Zero dependencies, single HTML file, works offline.
 
-**Live:** [speak.offenskill.com](https://speak.offenskill.com)
+**Live:** [voice.offenskill.com](https://voice.offenskill.com)
 
 ## Features
 
