@@ -446,20 +446,23 @@ body {
   transition: border-color var(--transition);
 }
 
-.text-box:empty::before {
-  content: attr(data-placeholder);
+textarea.text-box {
+  font-family: var(--font);
+  color: var(--text);
+  resize: none;
+  outline: none;
+}
+
+textarea.text-box:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+textarea.text-box::placeholder {
   color: var(--text-muted);
   font-style: italic;
   font-size: 1.1rem;
 }
-
-.text-box .interim {
-  color: var(--text-muted);
-  font-style: italic;
-  border-bottom: 1px dashed var(--border-strong);
-}
-
-.text-box .final { color: var(--text); }
 
 /* ═══ TTS INPUT + DISPLAY ═══ */
 .tts-input {
@@ -810,7 +813,7 @@ kbd {
       </div>
     </div>
 
-    <div class="text-box" id="transcript" data-placeholder="Start speaking and your words will appear here in real time..."></div>
+    <textarea class="text-box" id="transcript" placeholder="Start speaking and your words will appear here in real time..."></textarea>
   </div>
 
   <!-- TTS PANEL -->
@@ -879,7 +882,7 @@ Try pressing the Speak button below, and watch the words highlight as they are r
   <span class="footer-shortcut"><kbd>Space</kbd> record</span>
   <span class="footer-shortcut"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>C</kbd> copy</span>
   <span class="footer-shortcut"><kbd>Ctrl</kbd><kbd>Enter</kbd> speak</span>
-  <span class="footer-shortcut"><kbd>Esc</kbd> stop all</span>
+  <span class="footer-shortcut"><kbd>Esc</kbd> clear &amp; stop</span>
 </div>
 
 <!-- TOAST -->
@@ -956,7 +959,7 @@ Try pressing the Speak button below, and watch the words highlight as they are r
   function t(key) { return L[currentLang][key] || L['en-US'][key] || key; }
 
   function updatePlaceholders() {
-    transcriptBox.setAttribute('data-placeholder', t('sttPlaceholder'));
+    transcriptBox.placeholder = t('sttPlaceholder');
     ttsInput.placeholder = t('ttsInputHint');
     if (!isRecording) {
       micStatus.textContent = t('micReady');
@@ -967,9 +970,11 @@ Try pressing the Speak button below, and watch the words highlight as they are r
   var currentLang = 'en-US';
   var isRecording = false;
   var recognition = null;
-  var finalTranscript = '';
-  var interimTranscript = '';
   var shouldRestart = false;
+  var sttInsertPos = 0;           // Where to insert recognized text in the textarea
+  var sttPendingFinal = '';       // Accumulated final text for current recognition session
+  var sttPendingInterim = '';     // Current interim text (replaced on each result)
+  var sttLastInsertLen = 0;      // Length of text previously inserted (for correct replacement)
   var synth = window.speechSynthesis;
   var allVoices = [];           // ALL voices from browser
   var filteredVoices = [];      // Voices filtered for current language
@@ -985,13 +990,17 @@ Try pressing the Speak button below, and watch the words highlight as they are r
   var fallbackTimer = null;      // Fallback highlight timer for voices without boundary
 
   var SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') !== -1;
   if (!SpeechRecognitionAPI) {
+    if (isFirefox) {
+      browserWarning.innerHTML = 'Speech Recognition is not supported in Firefox. For the best experience, please visit this page using a <strong>Chrome-based browser</strong> (Chrome, Edge, Brave, Opera, etc.).';
+    }
     browserWarning.classList.add('visible');
     micBtn.disabled = true;
     micBtn.style.opacity = '0.3';
     micBtn.style.cursor = 'not-allowed';
     micStatus.textContent = 'Not supported in this browser';
-    micHint.textContent = 'Use Chrome, Edge, or Safari';
+    micHint.textContent = isFirefox ? 'Use a Chrome-based browser for full support' : 'Use Chrome, Edge, or Safari';
   }
 
   function showToast(msg, duration) {
@@ -1044,13 +1053,24 @@ Try pressing the Speak button below, and watch the words highlight as they are r
 
     populateVoices();
     updatePlaceholders();
-    // Swap TTS sample text if it's still the default
-    var enDefault = L['en-US'].ttsPlaceholder;
-    var frDefault = L['fr-FR'].ttsPlaceholder;
-    var cur = ttsInput.value.trim();
-    if (cur === enDefault.trim() || cur === frDefault.trim() || cur === '') {
-      ttsInput.value = t('ttsPlaceholder');
+
+    // Clear STT transcript
+    sttPendingFinal = '';
+    sttPendingInterim = '';
+    sttInsertPos = 0;
+    sttLastInsertLen = 0;
+    transcriptBox.value = '';
+
+    // Stop TTS if playing and clear
+    if (synth.speaking) {
+      clearKeepAlive();
+      stopFallbackHighlight();
+      synth.cancel();
+      hideSpeakingMode();
+      resetTtsButtons();
     }
+    ttsInput.value = t('ttsPlaceholder');
+
     var langName = lang === 'fr-FR' ? 'Francais' : 'English';
     showToast(langName + ' \u2014 STT + TTS');
   }
@@ -1078,15 +1098,20 @@ Try pressing the Speak button below, and watch the words highlight as they are r
     };
 
     recognition.onresult = function(event) {
-      interimTranscript = '';
+      var newFinal = '';
+      var newInterim = '';
       for (var i = event.resultIndex; i < event.results.length; i++) {
         var result = event.results[i];
         if (result.isFinal) {
-          finalTranscript += result[0].transcript;
+          newFinal += result[0].transcript;
         } else {
-          interimTranscript += result[0].transcript;
+          newInterim += result[0].transcript;
         }
       }
+      if (newFinal) {
+        sttPendingFinal += newFinal;
+      }
+      sttPendingInterim = newInterim;
       renderTranscript();
     };
 
@@ -1136,6 +1161,11 @@ Try pressing the Speak button below, and watch the words highlight as they are r
       if (!recognition) initRecognition();
       recognition.lang = currentLang;
       shouldRestart = true;
+      // Capture cursor position for insertion
+      sttInsertPos = transcriptBox.selectionStart || transcriptBox.value.length;
+      sttPendingFinal = '';
+      sttPendingInterim = '';
+      sttLastInsertLen = 0;
       try { recognition.start(); } catch (e) { console.warn(e); }
     }).catch(function() {});
   }
@@ -1148,6 +1178,17 @@ Try pressing the Speak button below, and watch the words highlight as they are r
     micStatus.textContent = t('micReady');
     micStatus.classList.remove('active');
     micHint.textContent = t('micHint');
+    // Finalize: advance insert position past what was inserted, clear pending interim
+    sttInsertPos = sttInsertPos + sttPendingFinal.length;
+    // Remove interim text from textarea if any remains
+    if (sttPendingInterim) {
+      var before = transcriptBox.value.substring(0, sttInsertPos);
+      var after = transcriptBox.value.substring(sttInsertPos + sttPendingInterim.length);
+      transcriptBox.value = before + after;
+      sttPendingInterim = '';
+    }
+    sttPendingFinal = '';
+    sttLastInsertLen = 0;
   }
 
   function toggleRecording() {
@@ -1155,24 +1196,21 @@ Try pressing the Speak button below, and watch the words highlight as they are r
   }
 
   function renderTranscript() {
-    transcriptBox.innerHTML = '';
-    if (finalTranscript) {
-      var s = document.createElement('span');
-      s.className = 'final';
-      s.textContent = finalTranscript;
-      transcriptBox.appendChild(s);
-    }
-    if (interimTranscript) {
-      var s2 = document.createElement('span');
-      s2.className = 'interim';
-      s2.textContent = interimTranscript;
-      transcriptBox.appendChild(s2);
-    }
+    var before = transcriptBox.value.substring(0, sttInsertPos);
+    var after = transcriptBox.value.substring(sttInsertPos + sttLastInsertLen);
+    // Rebuild: text before cursor + final + interim + text after
+    var inserted = sttPendingFinal + sttPendingInterim;
+    transcriptBox.value = before + inserted + after;
+    sttLastInsertLen = inserted.length;
+    // Move cursor to end of inserted text
+    var cursorPos = sttInsertPos + inserted.length;
+    transcriptBox.selectionStart = cursorPos;
+    transcriptBox.selectionEnd = cursorPos;
     transcriptBox.scrollTop = transcriptBox.scrollHeight;
   }
 
   function getTranscriptText() {
-    return (finalTranscript + interimTranscript).trim();
+    return transcriptBox.value.trim();
   }
 
   micBtn.addEventListener('click', toggleRecording);
@@ -1199,8 +1237,11 @@ Try pressing the Speak button below, and watch the words highlight as they are r
   });
 
   btnClear.addEventListener('click', function() {
-    finalTranscript = ''; interimTranscript = '';
-    transcriptBox.innerHTML = '';
+    sttPendingFinal = '';
+    sttPendingInterim = '';
+    sttInsertPos = 0;
+    sttLastInsertLen = 0;
+    transcriptBox.value = '';
     showToast('Cleared');
   });
 
@@ -1600,6 +1641,12 @@ Try pressing the Speak button below, and watch the words highlight as they are r
     }
     if (e.code === 'Escape') {
       if (isRecording) stopRecording();
+      // Clear STT transcript
+      sttPendingFinal = '';
+      sttPendingInterim = '';
+      sttInsertPos = 0;
+      sttLastInsertLen = 0;
+      transcriptBox.value = '';
       if (synth.speaking) {
         clearKeepAlive();
         stopFallbackHighlight();
