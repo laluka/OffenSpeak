@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OVT - OffenSkill Voice Toolbox</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base: #0f0f11;
+  --bg-surface: rgba(255,255,255,0.04);
+  --bg-surface-hover: rgba(255,255,255,0.07);
+  --bg-elevated: rgba(255,255,255,0.08);
+  --bg-input: rgba(255,255,255,0.06);
+  --text: #ececf1;
+  --text-secondary: #8e8ea0;
+  --text-muted: #565669;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.14);
+  --accent: #6c5ce7;
+  --accent-light: #a29bfe;
+  --accent-glow: rgba(108, 92, 231, 0.3);
+  --accent-subtle: rgba(108, 92, 231, 0.12);
+  --danger: #ff6b6b;
+  --danger-glow: rgba(255, 107, 107, 0.3);
+  --success: #51cf66;
+  --warning: #ffd43b;
+  --gradient-1: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  --gradient-2: linear-gradient(135deg, #ff6b6b 0%, #ffa07a 100%);
+  --gradient-bg: radial-gradient(ellipse at 20% 0%, rgba(108,92,231,0.15) 0%, transparent 50%),
+                 radial-gradient(ellipse at 80% 100%, rgba(162,155,254,0.08) 0%, transparent 50%);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  --transition: 0.2s ease;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-base: #f0f0f3;
+    --bg-surface: rgba(255,255,255,0.7);
+    --bg-surface-hover: rgba(255,255,255,0.9);
+    --bg-elevated: rgba(255,255,255,0.85);
+    --bg-input: rgba(0,0,0,0.03);
+    --text: #1a1a2e;
+    --text-secondary: #6b6b80;
+    --text-muted: #a0a0b0;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.14);
+    --accent: #6c5ce7;
+    --accent-light: #7c6ff0;
+    --accent-glow: rgba(108, 92, 231, 0.2);
+    --accent-subtle: rgba(108, 92, 231, 0.08);
+    --danger: #e74c3c;
+    --danger-glow: rgba(231, 76, 60, 0.2);
+    --gradient-bg: radial-gradient(ellipse at 20% 0%, rgba(108,92,231,0.08) 0%, transparent 50%),
+                   radial-gradient(ellipse at 80% 100%, rgba(162,155,254,0.06) 0%, transparent 50%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+  }
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font);
+  background: var(--bg-base);
+  background-image: var(--gradient-bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
+}
+
+/* ═══ TOPBAR ═══ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 16px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--gradient-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.topbar-logo svg {
+  width: 18px;
+  height: 18px;
+  fill: #fff;
+}
+
+.topbar h1 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lang-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.lang-toggle {
+  display: flex;
+  background: var(--bg-input);
+  border-radius: 999px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+
+.lang-toggle button {
+  padding: 5px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  border-radius: 999px;
+}
+
+.lang-toggle button.active {
+  background: var(--gradient-1);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.lang-toggle button:hover:not(.active) {
+  color: var(--text);
+  background: var(--bg-surface-hover);
+}
+
+.lang-scope {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* ═══ BROWSER WARNING ═══ */
+.browser-warning {
+  display: none;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #ff6b6b22 0%, #ffa07a22 100%);
+  border-bottom: 1px solid rgba(255,107,107,0.2);
+  color: var(--danger);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.browser-warning.visible { display: block; }
+
+/* ═══ MAIN LAYOUT ═══ */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  .main {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(400px, 1fr);
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel:first-child {
+  border-right: 1px solid var(--border);
+}
+
+@media (max-width: 860px) {
+  .panel:first-child {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* ═══ PANEL HEADER ═══ */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.panel-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.panel-icon.stt { background: var(--accent-subtle); color: var(--accent-light); }
+.panel-icon.tts { background: rgba(81,207,102,0.12); color: var(--success); }
+
+.panel-icon svg { width: 16px; height: 16px; fill: currentColor; }
+
+.panel-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-secondary);
+}
+
+.lang-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--accent-subtle);
+  color: var(--accent-light);
+  border-radius: 999px;
+  line-height: 1.5;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ═══ BUTTONS ═══ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  user-select: none;
+  backdrop-filter: blur(10px);
+}
+
+.btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.btn:active { transform: translateY(0) scale(0.98); }
+
+.btn-accent {
+  background: var(--gradient-1);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.btn-accent:hover {
+  box-shadow: 0 4px 20px var(--accent-glow);
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+
+/* ═══ MIC BUTTON ═══ */
+.mic-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.mic-btn-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.mic-btn-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.mic-btn-wrap.recording .mic-btn-ring {
+  border-color: var(--danger);
+  animation: ring-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.12); opacity: 0; }
+}
+
+.mic-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.mic-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+.mic-btn:hover {
+  background: var(--accent-subtle);
+  color: var(--accent-light);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.mic-btn-wrap.recording .mic-btn {
+  background: var(--gradient-2);
+  color: #fff;
+  box-shadow: 0 0 24px var(--danger-glow);
+  animation: mic-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 20px var(--danger-glow); }
+  50% { box-shadow: 0 0 36px var(--danger-glow), 0 0 60px rgba(255,107,107,0.15); }
+}
+
+.mic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mic-status {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.mic-status.active { color: var(--danger); font-weight: 600; }
+
+.mic-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* ═══ TRANSCRIPT ═══ */
+.text-box {
+  flex: 1;
+  min-height: 140px;
+  padding: 18px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-y: auto;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  transition: border-color var(--transition);
+}
+
+.text-box:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+.text-box .interim {
+  color: var(--text-muted);
+  font-style: italic;
+  border-bottom: 1px dashed var(--border-strong);
+}
+
+.text-box .final { color: var(--text); }
+
+/* ═══ TTS INPUT + DISPLAY ═══ */
+.tts-input {
+  flex: 1;
+  min-height: 140px;
+  padding: 18px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  transition: all var(--transition);
+}
+
+.tts-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.tts-input::placeholder { color: var(--text-muted); font-size: 0.88rem; }
+
+.tts-input.hidden { display: none; }
+
+.tts-display {
+  display: none;
+  flex: 1;
+  min-height: 140px;
+  padding: 18px;
+  background: var(--bg-input);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--text);
+  overflow-y: auto;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+.tts-display.visible { display: block; }
+
+.tts-display .tts-word {
+  transition: all 0.15s ease;
+  border-radius: 4px;
+  padding: 1px 0;
+}
+
+.tts-display .tts-word.tts-highlight {
+  background: var(--gradient-1);
+  color: #fff;
+  padding: 2px 6px;
+  margin: 0 -3px;
+  border-radius: 6px;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.tts-display .tts-word.tts-spoken {
+  color: var(--text-muted);
+}
+
+.tts-speaking-indicator {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.tts-speaking-indicator.visible { display: flex; }
+
+.tts-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.tts-eq span {
+  display: block;
+  width: 3px;
+  background: var(--accent-light);
+  border-radius: 2px;
+  animation: eq-bar 0.8s ease-in-out infinite;
+}
+
+.tts-eq span:nth-child(1) { height: 6px; animation-delay: 0s; }
+.tts-eq span:nth-child(2) { height: 10px; animation-delay: 0.15s; }
+.tts-eq span:nth-child(3) { height: 4px; animation-delay: 0.3s; }
+.tts-eq span:nth-child(4) { height: 12px; animation-delay: 0.1s; }
+
+@keyframes eq-bar {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.3); }
+}
+
+.tts-speaking-indicator.paused .tts-eq span {
+  animation-play-state: paused;
+}
+
+.tts-speaking-indicator.paused #tts-speaking-text {
+  opacity: 0.5;
+}
+
+/* ═══ TTS CONTROLS ═══ */
+.tts-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  flex-shrink: 0;
+  padding: 14px;
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.tts-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tts-controls label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  min-width: 48px;
+}
+
+.tts-controls select {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--bg-input);
+  color: var(--text);
+  outline: none;
+  max-width: 280px;
+  flex: 1;
+}
+
+.tts-controls select:focus { border-color: var(--accent); }
+
+.tts-controls input[type="range"] {
+  flex: 1;
+  max-width: 140px;
+  accent-color: var(--accent);
+  height: 4px;
+}
+
+.range-val {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  min-width: 32px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.tts-controls-row.playback {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* ═══ TOAST ═══ */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--bg-elevated);
+  color: var(--text);
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-strong);
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ═══ FOOTER ═══ */
+.footer {
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.footer-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+/* ═══ MIC PERMISSION OVERLAY ═══ */
+.mic-permission {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+}
+
+.mic-permission.visible { display: flex; }
+
+.mic-permission-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  max-width: 320px;
+  box-shadow: var(--shadow-lg);
+}
+
+.mic-permission-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.mic-permission-card p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+    </div>
+    <h1>OVT <span style="font-weight:400;opacity:0.5;font-size:0.55em;vertical-align:middle;">OffenSkill Voice Toolbox</span></h1>
+  </div>
+  <div class="topbar-controls">
+    <span class="lang-label">Language</span>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button id="lang-en" class="active">English</button>
+      <button id="lang-fr">Francais</button>
+    </div>
+    <span class="lang-scope">STT + TTS</span>
+  </div>
+</div>
+
+<!-- BROWSER WARNING -->
+<div class="browser-warning" id="browser-warning">
+  Speech Recognition is not supported in this browser. Please use Chrome, Edge, or Safari.
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STT PANEL -->
+  <div class="panel" id="stt-panel" style="position:relative;">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <div class="panel-icon stt">
+          <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/></svg>
+        </div>
+        <span class="panel-title">Speech to Text</span>
+        <span class="lang-badge" id="stt-lang-badge">EN</span>
+      </div>
+      <div class="panel-actions">
+        <button class="btn" id="btn-copy" title="Copy to clipboard">
+          <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          Copy
+        </button>
+        <button class="btn" id="btn-send-tts" title="Send to TTS panel">
+          <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          To TTS
+        </button>
+        <button class="btn" id="btn-clear" title="Clear">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="mic-area">
+      <div class="mic-btn-wrap" id="mic-btn-wrap">
+        <div class="mic-btn-ring"></div>
+        <button class="mic-btn" id="mic-btn" title="Start/Stop recording">
+          <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        </button>
+      </div>
+      <div class="mic-info">
+        <span class="mic-status" id="mic-status">Ready to listen</span>
+        <span class="mic-hint" id="mic-hint">Press <kbd>Space</kbd> or click the mic</span>
+      </div>
+    </div>
+
+    <div class="text-box" id="transcript" data-placeholder="Start speaking and your words will appear here in real time..."></div>
+  </div>
+
+  <!-- TTS PANEL -->
+  <div class="panel" id="tts-panel">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <div class="panel-icon tts">
+          <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </div>
+        <span class="panel-title">Text to Speech</span>
+        <span class="lang-badge" id="tts-lang-badge">EN</span>
+      </div>
+      <div class="panel-actions">
+        <button class="btn" id="btn-clear-tts" title="Clear">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="tts-speaking-indicator" id="tts-speaking-indicator">
+      <div class="tts-eq"><span></span><span></span><span></span><span></span></div>
+      <span id="tts-speaking-text">Speaking...</span>
+    </div>
+
+    <textarea class="tts-input" id="tts-input" placeholder="Type or paste text here...">The quick brown fox jumps over the lazy dog. This is a sample text to test the text-to-speech feature.
+
+Try pressing the Speak button below, and watch the words highlight as they are read aloud!</textarea>
+    <div class="tts-display" id="tts-display"></div>
+
+    <div class="tts-controls">
+      <div class="tts-controls-row">
+        <label for="voice-select">Voice</label>
+        <select id="voice-select"></select>
+      </div>
+      <div class="tts-controls-row">
+        <label for="rate-slider">Speed</label>
+        <input type="range" id="rate-slider" min="0.5" max="2" step="0.1" value="1">
+        <span class="range-val" id="rate-val">1.0x</span>
+      </div>
+      <div class="tts-controls-row">
+        <label for="pitch-slider">Pitch</label>
+        <input type="range" id="pitch-slider" min="0.5" max="2" step="0.1" value="1">
+        <span class="range-val" id="pitch-val">1.0</span>
+      </div>
+      <div class="tts-controls-row playback">
+        <button class="btn btn-accent" id="btn-speak">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          Speak
+        </button>
+        <button class="btn" id="btn-pause" disabled>
+          <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          Pause
+        </button>
+        <button class="btn" id="btn-stop-tts" disabled>
+          <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+          Stop
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-shortcut"><kbd>Space</kbd> record</span>
+  <span class="footer-shortcut"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>C</kbd> copy</span>
+  <span class="footer-shortcut"><kbd>Ctrl</kbd><kbd>Enter</kbd> speak</span>
+  <span class="footer-shortcut"><kbd>Esc</kbd> stop all</span>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  var g = function(id) { return document.getElementById(id); };
+  var langBtnEn = g('lang-en');
+  var langBtnFr = g('lang-fr');
+  var browserWarning = g('browser-warning');
+  var micBtn = g('mic-btn');
+  var micBtnWrap = g('mic-btn-wrap');
+  var micStatus = g('mic-status');
+  var micHint = g('mic-hint');
+  var transcriptBox = g('transcript');
+  var btnCopy = g('btn-copy');
+  var btnSendTts = g('btn-send-tts');
+  var btnClear = g('btn-clear');
+  var ttsInput = g('tts-input');
+  var ttsDisplay = g('tts-display');
+  var ttsSpeakingIndicator = g('tts-speaking-indicator');
+  var btnClearTts = g('btn-clear-tts');
+  var voiceSelect = g('voice-select');
+  var rateSlider = g('rate-slider');
+  var rateVal = g('rate-val');
+  var pitchSlider = g('pitch-slider');
+  var pitchVal = g('pitch-val');
+  var btnSpeak = g('btn-speak');
+  var btnPause = g('btn-pause');
+  var btnStopTts = g('btn-stop-tts');
+  var toastEl = g('toast');
+  var sttLangBadge = g('stt-lang-badge');
+  var ttsLangBadge = g('tts-lang-badge');
+
+  // ==========================================
+  //  LOCALIZED STRINGS
+  // ==========================================
+  var L = {
+    'en-US': {
+      sttPlaceholder: 'Start speaking and your words will appear here in real time...',
+      ttsPlaceholder: 'The quick brown fox jumps over the lazy dog. This is a sample text to test the text-to-speech feature.\n\nTry pressing the Speak button below, and watch the words highlight as they are read aloud!',
+      ttsInputHint: 'Type or paste text here...',
+      micReady: 'Ready to listen',
+      micHint: 'Press Space or click the mic',
+      micListening: 'Listening...',
+      micStop: 'Press Space or click to stop',
+      micResuming: 'Resuming...',
+      micDenied: 'Microphone access denied',
+      micDeniedHint: 'Allow mic access in browser settings',
+      micNetwork: 'Network error',
+      micNetworkHint: 'Chrome needs internet for speech recognition',
+      speaking: 'Speaking...'
+    },
+    'fr-FR': {
+      sttPlaceholder: 'Commencez a parler et vos mots apparaitront ici en temps reel...',
+      ttsPlaceholder: 'Le renard brun rapide saute par-dessus le chien paresseux. Ceci est un texte pour tester la synthese vocale.\n\nAppuyez sur le bouton Parler ci-dessous et observez les mots se surligner au fur et a mesure de la lecture !',
+      ttsInputHint: 'Tapez ou collez du texte ici...',
+      micReady: 'Pret a ecouter',
+      micHint: 'Appuyez sur Espace ou cliquez le micro',
+      micListening: 'Ecoute en cours...',
+      micStop: 'Appuyez sur Espace ou cliquez pour arreter',
+      micResuming: 'Reprise...',
+      micDenied: 'Acces au micro refuse',
+      micDeniedHint: 'Autorisez le micro dans les parametres du navigateur',
+      micNetwork: 'Erreur reseau',
+      micNetworkHint: 'Chrome a besoin d\'internet pour la reconnaissance vocale',
+      speaking: 'Lecture en cours...'
+    }
+  };
+
+  function t(key) { return L[currentLang][key] || L['en-US'][key] || key; }
+
+  function updatePlaceholders() {
+    transcriptBox.setAttribute('data-placeholder', t('sttPlaceholder'));
+    ttsInput.placeholder = t('ttsInputHint');
+    if (!isRecording) {
+      micStatus.textContent = t('micReady');
+      micHint.textContent = t('micHint');
+    }
+  }
+
+  var currentLang = 'en-US';
+  var isRecording = false;
+  var recognition = null;
+  var finalTranscript = '';
+  var interimTranscript = '';
+  var shouldRestart = false;
+  var synth = window.speechSynthesis;
+  var allVoices = [];           // ALL voices from browser
+  var filteredVoices = [];      // Voices filtered for current language
+  var toastTimeout = null;
+  var isSpeaking = false;
+  var userPaused = false;       // Track if USER clicked pause (vs keepalive)
+  var wordSpans = [];
+  var currentHighlightIdx = -1; // Track highlighted word index for perf
+  var keepAlive = null;
+  var micStream = null;
+  var micPermGranted = false;
+  var boundaryReceived = false;  // Track if voice supports boundary events
+  var fallbackTimer = null;      // Fallback highlight timer for voices without boundary
+
+  var SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognitionAPI) {
+    browserWarning.classList.add('visible');
+    micBtn.disabled = true;
+    micBtn.style.opacity = '0.3';
+    micBtn.style.cursor = 'not-allowed';
+    micStatus.textContent = 'Not supported in this browser';
+    micHint.textContent = 'Use Chrome, Edge, or Safari';
+  }
+
+  function showToast(msg, duration) {
+    duration = duration || 2000;
+    toastEl.textContent = msg;
+    toastEl.classList.add('visible');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(function() { toastEl.classList.remove('visible'); }, duration);
+  }
+
+  // ==========================================
+  //  MIC PERMISSION
+  // ==========================================
+  function ensureMicPermission() {
+    return new Promise(function(resolve, reject) {
+      if (micPermGranted && micStream) { resolve(); return; }
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          micStream = stream;
+          micPermGranted = true;
+          resolve();
+        })
+        .catch(function(err) {
+          console.warn('Mic permission denied:', err);
+          micStatus.textContent = 'Microphone access denied';
+          micHint.textContent = 'Allow mic access in browser settings';
+          showToast('Microphone permission denied');
+          reject(err);
+        });
+    });
+  }
+
+  // ==========================================
+  //  LANGUAGE TOGGLE
+  // ==========================================
+  function setLang(lang) {
+    currentLang = lang;
+    var display = lang === 'fr-FR' ? 'FR' : 'EN';
+    langBtnEn.classList.toggle('active', lang === 'en-US');
+    langBtnFr.classList.toggle('active', lang === 'fr-FR');
+    sttLangBadge.textContent = display;
+    ttsLangBadge.textContent = display;
+
+    if (recognition) {
+      var wasRecording = isRecording;
+      if (wasRecording) stopRecording();
+      recognition.lang = currentLang;
+      if (wasRecording) startRecording();
+    }
+
+    populateVoices();
+    updatePlaceholders();
+    // Swap TTS sample text if it's still the default
+    var enDefault = L['en-US'].ttsPlaceholder;
+    var frDefault = L['fr-FR'].ttsPlaceholder;
+    var cur = ttsInput.value.trim();
+    if (cur === enDefault.trim() || cur === frDefault.trim() || cur === '') {
+      ttsInput.value = t('ttsPlaceholder');
+    }
+    var langName = lang === 'fr-FR' ? 'Francais' : 'English';
+    showToast(langName + ' \u2014 STT + TTS');
+  }
+
+  langBtnEn.addEventListener('click', function() { setLang('en-US'); });
+  langBtnFr.addEventListener('click', function() { setLang('fr-FR'); });
+
+  // ==========================================
+  //  SPEECH TO TEXT
+  // ==========================================
+  function initRecognition() {
+    if (!SpeechRecognitionAPI) return;
+    recognition = new SpeechRecognitionAPI();
+    recognition.lang = currentLang;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = function() {
+      isRecording = true;
+      micBtnWrap.classList.add('recording');
+      micStatus.textContent = t('micListening');
+      micStatus.classList.add('active');
+      micHint.textContent = t('micStop');
+    };
+
+    recognition.onresult = function(event) {
+      interimTranscript = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript;
+        } else {
+          interimTranscript += result[0].transcript;
+        }
+      }
+      renderTranscript();
+    };
+
+    recognition.onerror = function(event) {
+      console.warn('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        micStatus.textContent = t('micDenied');
+        micStatus.classList.remove('active');
+        micHint.textContent = t('micDeniedHint');
+        isRecording = false;
+        shouldRestart = false;
+        micBtnWrap.classList.remove('recording');
+      } else if (event.error === 'network') {
+        micStatus.textContent = t('micNetwork');
+        micStatus.classList.remove('active');
+        micHint.textContent = t('micNetworkHint');
+      }
+    };
+
+    recognition.onend = function() {
+      micBtnWrap.classList.remove('recording');
+      micStatus.classList.remove('active');
+      if (shouldRestart && isRecording) {
+        micStatus.textContent = t('micResuming');
+        setTimeout(function() {
+          try {
+            recognition.lang = currentLang;
+            recognition.start();
+          } catch (e) {
+            isRecording = false;
+            shouldRestart = false;
+            micStatus.textContent = t('micReady');
+            micHint.textContent = t('micHint');
+          }
+        }, 100);
+      } else {
+        isRecording = false;
+        micStatus.textContent = t('micReady');
+        micHint.textContent = t('micHint');
+      }
+    };
+  }
+
+  function startRecording() {
+    if (!SpeechRecognitionAPI) { showToast('Not supported'); return; }
+    ensureMicPermission().then(function() {
+      if (!recognition) initRecognition();
+      recognition.lang = currentLang;
+      shouldRestart = true;
+      try { recognition.start(); } catch (e) { console.warn(e); }
+    }).catch(function() {});
+  }
+
+  function stopRecording() {
+    shouldRestart = false;
+    isRecording = false;
+    if (recognition) { try { recognition.stop(); } catch (e) {} }
+    micBtnWrap.classList.remove('recording');
+    micStatus.textContent = t('micReady');
+    micStatus.classList.remove('active');
+    micHint.textContent = t('micHint');
+  }
+
+  function toggleRecording() {
+    if (isRecording) stopRecording(); else startRecording();
+  }
+
+  function renderTranscript() {
+    transcriptBox.innerHTML = '';
+    if (finalTranscript) {
+      var s = document.createElement('span');
+      s.className = 'final';
+      s.textContent = finalTranscript;
+      transcriptBox.appendChild(s);
+    }
+    if (interimTranscript) {
+      var s2 = document.createElement('span');
+      s2.className = 'interim';
+      s2.textContent = interimTranscript;
+      transcriptBox.appendChild(s2);
+    }
+    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+  }
+
+  function getTranscriptText() {
+    return (finalTranscript + interimTranscript).trim();
+  }
+
+  micBtn.addEventListener('click', toggleRecording);
+
+  btnCopy.addEventListener('click', function() {
+    var text = getTranscriptText();
+    if (!text) { showToast('Nothing to copy'); return; }
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('Copied to clipboard!');
+    }).catch(function() {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('Copied to clipboard!');
+    });
+  });
+
+  btnSendTts.addEventListener('click', function() {
+    var text = getTranscriptText();
+    if (!text) { showToast('No transcript to send'); return; }
+    ttsInput.value = text;
+    ttsInput.focus();
+    showToast('Sent to Text-to-Speech');
+  });
+
+  btnClear.addEventListener('click', function() {
+    finalTranscript = ''; interimTranscript = '';
+    transcriptBox.innerHTML = '';
+    showToast('Cleared');
+  });
+
+  // ==========================================
+  //  TEXT TO SPEECH — VOICES
+  // ==========================================
+  function populateVoices() {
+    allVoices = synth.getVoices();
+    var langPrefix = currentLang.split('-')[0];
+
+    // Filter: match language prefix (en*, fr*) — catches en-US, en-GB, fr-FR, fr-CA, etc.
+    filteredVoices = allVoices.filter(function(v) {
+      return v.lang.toLowerCase().startsWith(langPrefix);
+    });
+
+    voiceSelect.innerHTML = '';
+
+    if (filteredVoices.length === 0) {
+      var opt = document.createElement('option');
+      opt.textContent = 'Default voice';
+      opt.value = '-1';
+      voiceSelect.appendChild(opt);
+      return;
+    }
+
+    // Sort: Google voices first (they support boundary events for highlight),
+    // then other online voices, then local voices, then alphabetical.
+    filteredVoices.sort(function(a, b) {
+      var aGoogle = a.name.toLowerCase().indexOf('google') !== -1 ? 1 : 0;
+      var bGoogle = b.name.toLowerCase().indexOf('google') !== -1 ? 1 : 0;
+      if (aGoogle !== bGoogle) return bGoogle - aGoogle;  // Google first
+      if (!a.localService && b.localService) return -1;   // Online before local
+      if (a.localService && !b.localService) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    filteredVoices.forEach(function(voice, i) {
+      var opt = document.createElement('option');
+      opt.value = String(i);
+      var label = voice.name;
+      // Clean up verbose names
+      label = label.replace('Microsoft ', '').replace('Google ', 'G ');
+      label += ' (' + voice.lang + ')';
+      if (!voice.localService) label += ' [online]';
+      opt.textContent = label;
+      voiceSelect.appendChild(opt);
+    });
+  }
+
+  // Voices load async — listen + retry
+  synth.addEventListener('voiceschanged', populateVoices);
+  populateVoices();
+  // Fallback: some browsers need a delay
+  setTimeout(populateVoices, 100);
+  setTimeout(populateVoices, 500);
+
+  rateSlider.addEventListener('input', function() {
+    rateVal.textContent = parseFloat(rateSlider.value).toFixed(1) + 'x';
+  });
+  pitchSlider.addEventListener('input', function() {
+    pitchVal.textContent = parseFloat(pitchSlider.value).toFixed(1);
+  });
+
+  // ==========================================
+  //  TTS WORD DISPLAY + HIGHLIGHT
+  // ==========================================
+  function buildWordDisplay(text) {
+    ttsDisplay.innerHTML = '';
+    wordSpans = [];
+    currentHighlightIdx = -1;
+    if (!text) return;
+
+    var i = 0, len = text.length;
+    while (i < len) {
+      if (/\s/.test(text[i])) {
+        var wsStart = i;
+        while (i < len && /\s/.test(text[i])) i++;
+        var wsText = text.substring(wsStart, i);
+        if (wsText.indexOf('\n') !== -1) {
+          var parts = wsText.split('\n');
+          for (var p = 0; p < parts.length; p++) {
+            if (p > 0) ttsDisplay.appendChild(document.createElement('br'));
+            if (parts[p]) ttsDisplay.appendChild(document.createTextNode(parts[p]));
+          }
+        } else {
+          ttsDisplay.appendChild(document.createTextNode(wsText));
+        }
+        continue;
+      }
+      var wordStart = i;
+      while (i < len && !/\s/.test(text[i])) i++;
+      var word = text.substring(wordStart, i);
+      var span = document.createElement('span');
+      span.className = 'tts-word';
+      span.textContent = word;
+      span.dataset.start = String(wordStart);
+      span.dataset.end = String(i);
+      ttsDisplay.appendChild(span);
+      wordSpans.push(span);
+    }
+  }
+
+  function highlightWordByIndex(idx) {
+    if (idx === currentHighlightIdx) return;  // No change
+    if (idx < 0 || idx >= wordSpans.length) return;
+
+    // Remove old highlight
+    if (currentHighlightIdx >= 0 && currentHighlightIdx < wordSpans.length) {
+      wordSpans[currentHighlightIdx].classList.remove('tts-highlight');
+      wordSpans[currentHighlightIdx].classList.add('tts-spoken');
+    }
+    // Mark everything before as spoken
+    for (var i = currentHighlightIdx + 1; i < idx; i++) {
+      wordSpans[i].classList.remove('tts-highlight');
+      wordSpans[i].classList.add('tts-spoken');
+    }
+    // Highlight new word
+    wordSpans[idx].classList.remove('tts-spoken');
+    wordSpans[idx].classList.add('tts-highlight');
+    currentHighlightIdx = idx;
+
+    // Scroll — but don't thrash layout. Only scroll if near edge.
+    var container = ttsDisplay;
+    var spanTop = wordSpans[idx].offsetTop;
+    var spanBottom = spanTop + wordSpans[idx].offsetHeight;
+    var viewTop = container.scrollTop;
+    var viewBottom = viewTop + container.clientHeight;
+    if (spanBottom > viewBottom - 20 || spanTop < viewTop + 20) {
+      wordSpans[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  function highlightWordAtChar(charIndex) {
+    // Binary-ish search: find word span containing charIndex
+    for (var i = 0; i < wordSpans.length; i++) {
+      var start = parseInt(wordSpans[i].dataset.start);
+      var end = parseInt(wordSpans[i].dataset.end);
+      if (charIndex >= start && charIndex < end) {
+        highlightWordByIndex(i);
+        return;
+      }
+      if (charIndex < start) {
+        // charIndex is in whitespace before this word — highlight this word
+        highlightWordByIndex(i);
+        return;
+      }
+    }
+    // charIndex is past all words — highlight last
+    if (wordSpans.length > 0) {
+      highlightWordByIndex(wordSpans.length - 1);
+    }
+  }
+
+  function clearHighlights() {
+    for (var i = 0; i < wordSpans.length; i++) {
+      wordSpans[i].classList.remove('tts-highlight', 'tts-spoken');
+    }
+    currentHighlightIdx = -1;
+  }
+
+  // Fallback: estimate word timing when boundary events don't fire.
+  // Uses per-word duration based on word length (longer words take longer).
+  // Delayed start: gives boundary events 300ms to arrive first.
+  var fallbackDelayTimer = null;
+
+  function startFallbackHighlight(text, rate) {
+    stopFallbackHighlight();
+    if (wordSpans.length === 0) return;
+
+    // Wait 300ms — if boundary events fire in that time, don't start fallback
+    fallbackDelayTimer = setTimeout(function() {
+      fallbackDelayTimer = null;
+      if (boundaryReceived) return;  // Boundary events working, skip fallback
+
+      // Calculate per-word durations based on word length
+      // Base: ~180 WPM at rate=1.0, adjusted per word length
+      var baseMs = (60000 / (180 * rate));  // ms per average word
+      var avgWordLen = 5;  // average word length in chars
+      var wordIdx = 0;
+
+      function advanceWord() {
+        if (boundaryReceived || wordIdx >= wordSpans.length) {
+          fallbackTimer = null;
+          return;
+        }
+        // If user paused, keep polling until resumed — don't advance
+        if (userPaused) {
+          fallbackTimer = setTimeout(advanceWord, 100);
+          return;
+        }
+        highlightWordByIndex(wordIdx);
+        var word = wordSpans[wordIdx].textContent;
+        // Duration proportional to word length, min 80ms, max 600ms
+        var duration = Math.max(80, Math.min(600, baseMs * (word.length / avgWordLen)));
+        wordIdx++;
+        fallbackTimer = setTimeout(advanceWord, duration);
+      }
+      advanceWord();
+    }, 300);
+  }
+
+  function stopFallbackHighlight() {
+    if (fallbackDelayTimer) { clearTimeout(fallbackDelayTimer); fallbackDelayTimer = null; }
+    if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+  }
+
+  function showSpeakingMode() {
+    ttsInput.classList.add('hidden');
+    ttsDisplay.classList.add('visible');
+    ttsSpeakingIndicator.classList.add('visible');
+    var speakingText = document.getElementById('tts-speaking-text');
+    if (speakingText) speakingText.textContent = t('speaking');
+    isSpeaking = true;
+  }
+
+  function hideSpeakingMode() {
+    ttsInput.classList.remove('hidden');
+    ttsDisplay.classList.remove('visible');
+    ttsSpeakingIndicator.classList.remove('visible');
+    isSpeaking = false;
+    userPaused = false;
+    clearHighlights();
+    stopFallbackHighlight();
+    ttsDisplay.innerHTML = '';
+    wordSpans = [];
+  }
+
+  function resetTtsButtons() {
+    btnPause.disabled = true;
+    btnStopTts.disabled = true;
+    btnSpeak.disabled = false;
+    btnPause.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause';
+  }
+
+  function clearKeepAlive() {
+    if (keepAlive) { clearInterval(keepAlive); keepAlive = null; }
+  }
+
+  function startKeepAlive() {
+    clearKeepAlive();
+    // Chrome bug: utterances > ~15s get cut off. Workaround: nudge every 14s.
+    // ONLY nudge if NOT user-paused.
+    keepAlive = setInterval(function() {
+      if (synth.speaking && !synth.paused && !userPaused) {
+        synth.pause();
+        // Resume after a tiny delay to avoid disrupting boundary events
+        setTimeout(function() {
+          if (!userPaused && synth.paused) {
+            synth.resume();
+          }
+        }, 50);
+      }
+    }, 14000);
+  }
+
+  // ==========================================
+  //  SPEAK
+  // ==========================================
+  function speak() {
+    var text = ttsInput.value.trim();
+    if (!text) { showToast('No text to speak'); return; }
+
+    synth.cancel();
+    clearKeepAlive();
+    stopFallbackHighlight();
+    userPaused = false;
+    boundaryReceived = false;
+
+    buildWordDisplay(text);
+    showSpeakingMode();
+
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = currentLang;
+    utterance.rate = parseFloat(rateSlider.value);
+    utterance.pitch = parseFloat(pitchSlider.value);
+
+    // Use voice from the filteredVoices array directly
+    var selectedIdx = parseInt(voiceSelect.value);
+    if (selectedIdx >= 0 && selectedIdx < filteredVoices.length) {
+      utterance.voice = filteredVoices[selectedIdx];
+    }
+
+    utterance.onboundary = function(event) {
+      if (event.name === 'word') {
+        boundaryReceived = true;
+        if (!userPaused) {
+          highlightWordAtChar(event.charIndex);
+        }
+      }
+    };
+
+    utterance.onstart = function() {
+      btnPause.disabled = false;
+      btnStopTts.disabled = false;
+      btnSpeak.disabled = true;
+      // Highlight first word
+      if (wordSpans.length > 0) highlightWordByIndex(0);
+      // Start keepalive for Chrome long-text bug
+      startKeepAlive();
+      // Start fallback highlight timer (will stop if real boundary events fire)
+      startFallbackHighlight(text, utterance.rate);
+    };
+
+    utterance.onend = function() {
+      clearKeepAlive();
+      stopFallbackHighlight();
+      // Mark all words as spoken
+      if (wordSpans.length > 0) {
+        highlightWordByIndex(wordSpans.length - 1);
+      }
+      setTimeout(function() {
+        hideSpeakingMode();
+        resetTtsButtons();
+      }, 500);
+    };
+
+    utterance.onerror = function(e) {
+      // 'interrupted' fires on synth.cancel() — not a real error
+      if (e.error === 'interrupted') return;
+      console.warn('TTS error:', e.error);
+      clearKeepAlive();
+      stopFallbackHighlight();
+      hideSpeakingMode();
+      resetTtsButtons();
+    };
+
+    synth.speak(utterance);
+  }
+
+  btnSpeak.addEventListener('click', speak);
+
+  // ==========================================
+  //  PAUSE / RESUME — properly tracked
+  // ==========================================
+  btnPause.addEventListener('click', function() {
+    if (userPaused) {
+      // RESUME
+      userPaused = false;
+      synth.resume();
+      startKeepAlive();
+      ttsSpeakingIndicator.classList.remove('paused');
+      btnPause.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause';
+    } else {
+      // PAUSE
+      userPaused = true;
+      clearKeepAlive();
+      synth.pause();
+      ttsSpeakingIndicator.classList.add('paused');
+      btnPause.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Resume';
+    }
+  });
+
+  btnStopTts.addEventListener('click', function() {
+    clearKeepAlive();
+    stopFallbackHighlight();
+    synth.cancel();
+    hideSpeakingMode();
+    resetTtsButtons();
+  });
+
+  btnClearTts.addEventListener('click', function() {
+    clearKeepAlive();
+    stopFallbackHighlight();
+    synth.cancel();
+    hideSpeakingMode();
+    ttsInput.value = '';
+    resetTtsButtons();
+    showToast('Cleared');
+  });
+
+  // ==========================================
+  //  KEYBOARD SHORTCUTS
+  // ==========================================
+  document.addEventListener('keydown', function(e) {
+    var active = document.activeElement;
+    var isTyping = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT' || active.isContentEditable);
+
+    if (e.code === 'Space' && !isTyping) {
+      e.preventDefault();
+      toggleRecording();
+    }
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyC') {
+      e.preventDefault();
+      btnCopy.click();
+    }
+    if (e.ctrlKey && e.code === 'Enter') {
+      e.preventDefault();
+      if (!synth.speaking) {
+        speak();
+      } else {
+        clearKeepAlive();
+        stopFallbackHighlight();
+        synth.cancel();
+        hideSpeakingMode();
+        resetTtsButtons();
+      }
+    }
+    if (e.code === 'Escape') {
+      if (isRecording) stopRecording();
+      if (synth.speaking) {
+        clearKeepAlive();
+        stopFallbackHighlight();
+        synth.cancel();
+        hideSpeakingMode();
+        resetTtsButtons();
+      }
+    }
+  });
+
+  // ==========================================
+  //  INIT
+  // ==========================================
+  initRecognition();
+  updatePlaceholders();
+
+})();
+</script>
+
+</body>
+</html>
